@@ -1,4 +1,4 @@
-require 'mail'
+require "mail"
 
 module Griddler
   module Sparkpost
@@ -13,22 +13,23 @@ module Griddler
       end
 
       def normalize_params
-        msg = params['_json'][0]['msys']['relay_message']
-        content = msg['content']
-        mail = Mail.read_from_string(content['email_rfc822'])
-        # SparkPost documentation isn't clear on friendly_from.
-        # In case there's a full email address (e.g. "Test User <test@test.com>"), strip out junk
-        clean_from = msg['friendly_from'].split('<').last.delete('>').strip
-        params.merge(
-          to: content['to'],
+        msg = params["_json"][0]["msys"]["relay_message"]
+        content = msg["content"]
+        mail = Mail.read_from_string(content["email_rfc822"])
+        alt_from = msg["friendly_from"] ||
+          msg["msg_from"] ||
+          content["headers"].find { |h| !h["From"].nil? }.values.first
+        clean_from = alt_from&.split("<")&.last&.delete(">")&.strip
+        params.merge({
+          to: content["to"],
           from: clean_from,
-          cc: content['cc'].nil? ? [] : content['cc'],
-          subject: content['subject'],
-          text: content['text'],
-          html: content['html'],
-          headers: headers_raw(content['headers']), # spec calls for raw headers, so convert back
+          cc: content["cc"].nil? ? [] : content["cc"],
+          subject: content["subject"],
+          text: content["text"],
+          html: content["html"],
+          headers: headers_raw(content["headers"]), # spec calls for raw headers, so convert back
           attachments: attachment_files(mail)
-        )
+        }.compact)
       end
 
       private
@@ -54,8 +55,8 @@ module Griddler
       end
 
       def create_tempfile(attachment)
-        filename = attachment.filename.gsub(/\/|\\/, '_')
-        tempfile = Tempfile.new(filename, Dir::tmpdir, encoding: 'ascii-8bit')
+        filename = attachment.filename.gsub(/\/|\\/, "_")
+        tempfile = Tempfile.new(filename, Dir.tmpdir, encoding: "ascii-8bit")
         content = attachment.body.decoded
         tempfile.write(content)
         tempfile.rewind
