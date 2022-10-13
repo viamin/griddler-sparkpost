@@ -1,13 +1,13 @@
-require 'spec_helper'
-require 'active_support/all'
+require "spec_helper"
+require "active_support/all"
 
 describe Griddler::Sparkpost::Adapter do
-  it 'registers itself with griddler' do
-    Griddler.adapter_registry[:sparkpost].should eq Griddler::Sparkpost::Adapter
+  it "registers itself with griddler" do
+    expect(Griddler.adapter_registry[:sparkpost]).to eq(Griddler::Sparkpost::Adapter)
   end
 end
 
-describe Griddler::Sparkpost::Adapter, '.normalize_params' do
+describe Griddler::Sparkpost::Adapter, ".normalize_params" do
   # it_should_behave_like 'Griddler adapter',
   #   :sparkpost,
   #   {
@@ -45,61 +45,61 @@ describe Griddler::Sparkpost::Adapter, '.normalize_params' do
   #   normalized_params.should_not have_key(:attachment_info)
   # end
 
-  it 'has no attachments' do
-    params = default_params.merge(attachments: '0')
+  it "has no attachments" do
+    params = default_params.merge(attachments: "0")
 
     normalized_params = Griddler::Sparkpost::Adapter.normalize_params(params)
-    normalized_params[:attachments].should be_empty
+    expect(normalized_params[:attachments]).to be_empty
   end
 
-  it 'wraps to in an array' do
+  it "wraps to in an array" do
     normalized_params = Griddler::Sparkpost::Adapter.normalize_params(default_params)
 
-    normalized_params[:to].should eq default_params['_json'][0]['msys']['relay_message']['content']['to']
+    expect(normalized_params[:to]).to eq(default_params["_json"][0]["msys"]["relay_message"]["content"]["to"])
   end
 
-  it 'wraps cc in an array' do
+  it "wraps cc in an array" do
     normalized_params = Griddler::Sparkpost::Adapter.normalize_params(default_params)
 
-    normalized_params[:cc].should eq default_params['_json'][0]['msys']['relay_message']['content']['cc']
+    expect(normalized_params[:cc]).to eq(default_params["_json"][0]["msys"]["relay_message"]["content"]["cc"])
   end
 
-  it 'returns an array even if cc is empty' do
+  it "returns an array even if cc is empty" do
     params = default_params
-    params['_json'][0]['msys']['relay_message']['content']['cc'] = nil
+    params["_json"][0]["msys"]["relay_message"]["content"]["cc"] = nil
     normalized_params = Griddler::Sparkpost::Adapter.normalize_params(params)
 
-    normalized_params[:cc].should eq []
+    expect(normalized_params[:cc]).to eq([])
   end
 
   def default_params
     {
-      "_json": [{
-          "msys": {
-              "relay_message": {
-                  "rcpt_to": "hi@example.com",
-                  "friendly_from": "there@example.com",
-                  "customer_id": "12345",
-                  "content": {
-                      "text": "What up what up",
-                      "subject": "sup wit it",
-                      "html": "<div>hello</div>",
-                      "headers": [{
-                          "Return-Path": "<there@example.com>"
-                      }, {
-                          "From": "Test User <there@example.com>"
-                      }, {
-                          "To": "hi@example.com"
-                      }],
-                      "email_rfc822": "XXX",
-                      "email_rfc822_is_base64": false,
-                      "to": ["hi@example.com"],
-                      "cc": ["cc@example.com"]
-                  },
-                  "msg_from": "there@example.com",
-                  "webhook_id": "123456789"
-              }
+      _json: [{
+        msys: {
+          relay_message: {
+            rcpt_to: "hi@example.com",
+            friendly_from: "Hello there <there@example.com>",
+            customer_id: "12345",
+            content: {
+              text: "What up what up",
+              subject: "sup wit it",
+              html: "<div>hello</div>",
+              headers: [{
+                "Return-Path": "<there@example.com>"
+              }, {
+                From: "Test User <there@example.com>"
+              }, {
+                To: "hi@example.com"
+              }],
+              email_rfc822: "XXX",
+              email_rfc822_is_base64: false,
+              to: ["hi@example.com"],
+              cc: ["cc@example.com"]
+            },
+            msg_from: "there@example.com",
+            webhook_id: "123456789"
           }
+        }
       }]
     }.with_indifferent_access
   end

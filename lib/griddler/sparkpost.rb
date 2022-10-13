@@ -1,6 +1,6 @@
-require 'griddler'
-require 'griddler/sparkpost/version'
-require 'griddler/sparkpost/adapter'
+require "griddler"
+require "griddler/sparkpost/version"
+require "griddler/sparkpost/adapter"
 
 module Griddler
   module Sparkpost
